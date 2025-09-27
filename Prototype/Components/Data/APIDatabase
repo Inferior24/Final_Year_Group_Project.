@@ -1,0 +1,641 @@
+export const apiDatabase = {
+  // Content & Media APIs
+  "jsonplaceholder": {
+    id: "jsonplaceholder",
+    name: "JSONPlaceholder",
+    category: "content-media",
+    subcategory: "testing-data",
+    description: "Free fake REST API for testing and prototyping with realistic JSON data",
+    useCase: "Frontend development testing, API learning, prototype development",
+    tags: ["testing", "fake-data", "rest", "json", "free", "beginner-friendly"],
+    
+    metadata: {
+      popularity: 95,
+      rating: 4.8,
+      usageLevel: "beginner",
+      pricingModel: "free",
+      status: "active",
+      lastUpdated: "2024-01-15",
+      monthlyUsers: "2M+"
+    },
+    
+    technical: {
+      baseUrl: "https://jsonplaceholder.typicode.com",
+      authentication: "none",
+      rateLimit: "unlimited",
+      responseFormat: ["json"],
+      cors: true,
+      https: true,
+      endpoints: [
+        { path: "/posts", method: "GET", description: "Get all posts" },
+        { path: "/posts/{id}", method: "GET", description: "Get specific post" },
+        { path: "/users", method: "GET", description: "Get all users" },
+        { path: "/comments", method: "GET", description: "Get all comments" }
+      ]
+    },
+    
+    documentation: {
+      official: "https://jsonplaceholder.typicode.com/guide/",
+      tutorials: ["React Tutorial", "Vue.js Guide", "Angular Examples"],
+      sdks: ["JavaScript", "Python", "PHP"]
+    },
+    
+    realWorldExamples: [
+      {
+        company: "React Learning Platforms",
+        useCase: "Teaching API integration in React tutorials",
+        description: "Used by thousands of developers learning React data fetching"
+      },
+      {
+        company: "Coding Bootcamps",
+        useCase: "Student projects and assignments",
+        description: "Standard API for teaching REST concepts to new developers"
+      }
+    ],
+    
+    codeExamples: {
+      javascript: `fetch('https://jsonplaceholder.typicode.com/posts/1')
+  .then(response => response.json())
+  .then(data => console.log(data));`,
+      python: `import requests
+response = requests.get('https://jsonplaceholder.typicode.com/posts/1')
+data = response.json()`
+    },
+    
+    comparisonMetrics: {
+      responseTime: 150,
+      uptime: 99.9,
+      easeOfUse: 9.5,
+      documentation: 9.0,
+      communitySupport: 9.8
+    }
+  },
+
+  "catfacts": {
+    id: "catfacts",
+    name: "Cat Facts API",
+    category: "content-media",
+    subcategory: "entertainment",
+    description: "Simple API providing random and interesting cat facts for entertainment",
+    useCase: "Fun applications, learning projects, chatbot content, demo applications",
+    tags: ["entertainment", "facts", "cats", "simple", "free"],
+    
+    metadata: {
+      popularity: 75,
+      rating: 4.3,
+      usageLevel: "beginner",
+      pricingModel: "free",
+      status: "active",
+      lastUpdated: "2024-01-10",
+      monthlyUsers: "500K+"
+    },
+    
+    technical: {
+      baseUrl: "https://catfact.ninja",
+      authentication: "none",
+      rateLimit: "100 requests/minute",
+      responseFormat: ["json"],
+      cors: true,
+      https: true,
+      endpoints: [
+        { path: "/fact", method: "GET", description: "Get random cat fact" },
+        { path: "/facts", method: "GET", description: "Get paginated cat facts" }
+      ]
+    },
+    
+    documentation: {
+      official: "https://catfact.ninja/",
+      tutorials: ["API Integration Basics", "Random Content Apps"],
+      sdks: ["JavaScript", "Python"]
+    },
+    
+    realWorldExamples: [
+      {
+        company: "Pet Care Apps",
+        useCase: "Daily cat facts feature",
+        description: "Mobile apps showing daily interesting cat facts to users"
+      },
+      {
+        company: "Chatbots",
+        useCase: "Entertainment responses",
+        description: "Slack and Discord bots using cat facts for fun interactions"
+      }
+    ],
+    
+    codeExamples: {
+      javascript: `fetch('https://catfact.ninja/fact')
+  .then(response => response.json())
+  .then(data => console.log(data.fact));`,
+      python: `import requests
+response = requests.get('https://catfact.ninja/fact')
+fact = response.json()['fact']`
+    },
+    
+    comparisonMetrics: {
+      responseTime: 200,
+      uptime: 98.5,
+      easeOfUse: 9.0,
+      documentation: 7.5,
+      communitySupport: 8.0
+    }
+  },
+
+  "dogceo": {
+    id: "dogceo",
+    name: "Dog CEO API",
+    category: "content-media",
+    subcategory: "images",
+    description: "Collection of dog images organized by breed with high-quality photos",
+    useCase: "Image galleries, pet applications, random image displays, dog breed apps",
+    tags: ["images", "dogs", "breeds", "photos", "free"],
+    
+    metadata: {
+      popularity: 82,
+      rating: 4.6,
+      usageLevel: "beginner",
+      pricingModel: "free",
+      status: "active",
+      lastUpdated: "2024-01-12",
+      monthlyUsers: "800K+"
+    },
+    
+    technical: {
+      baseUrl: "https://dog.ceo/api",
+      authentication: "none",
+      rateLimit: "unlimited",
+      responseFormat: ["json"],
+      cors: true,
+      https: true,
+      endpoints: [
+        { path: "/breeds/image/random", method: "GET", description: "Random dog image" },
+        { path: "/breeds/list/all", method: "GET", description: "List all breeds" },
+        { path: "/breed/{breed}/images", method: "GET", description: "Images by breed" }
+      ]
+    },
+    
+    documentation: {
+      official: "https://dog.ceo/dog-api/documentation",
+      tutorials: ["Image Gallery Tutorial", "React Image App"],
+      sdks: ["JavaScript", "Python", "Swift"]
+    },
+    
+    realWorldExamples: [
+      {
+        company: "Pet Adoption Sites",
+        useCase: "Placeholder images for listings",
+        description: "Animal shelters using dog images while uploading actual photos"
+      },
+      {
+        company: "Dog Training Apps",
+        useCase: "Breed identification learning",
+        description: "Educational apps teaching users about different dog breeds"
+      }
+    ],
+    
+    codeExamples: {
+      javascript: `fetch('https://dog.ceo/api/breeds/image/random')
+  .then(response => response.json())
+  .then(data => console.log(data.message));`,
+      python: `import requests
+response = requests.get('https://dog.ceo/api/breeds/image/random')
+image_url = response.json()['message']`
+    },
+    
+    comparisonMetrics: {
+      responseTime: 180,
+      uptime: 99.2,
+      easeOfUse: 8.8,
+      documentation: 8.5,
+      communitySupport: 8.5
+    }
+  },
+
+  // Data & Information APIs
+  "restcountries": {
+    id: "restcountries",
+    name: "REST Countries",
+    category: "data-information",
+    subcategory: "geographic",
+    description: "Comprehensive database with detailed information about all countries",
+    useCase: "Geographic applications, travel websites, educational tools, form dropdowns",
+    tags: ["countries", "geographic", "reference", "travel", "free"],
+    
+    metadata: {
+      popularity: 88,
+      rating: 4.7,
+      usageLevel: "intermediate",
+      pricingModel: "free",
+      status: "active",
+      lastUpdated: "2024-01-08",
+      monthlyUsers: "1.5M+"
+    },
+    
+    technical: {
+      baseUrl: "https://restcountries.com/v3.1",
+      authentication: "none",
+      rateLimit: "reasonable use",
+      responseFormat: ["json"],
+      cors: true,
+      https: true,
+      endpoints: [
+        { path: "/all", method: "GET", description: "Get all countries" },
+        { path: "/name/{name}", method: "GET", description: "Search by country name" },
+        { path: "/alpha/{code}", method: "GET", description: "Get by country code" },
+        { path: "/region/{region}", method: "GET", description: "Get by region" }
+      ]
+    },
+    
+    documentation: {
+      official: "https://restcountries.com/",
+      tutorials: ["Geographic Data Apps", "Country Selector Tutorial"],
+      sdks: ["JavaScript", "Python", "PHP", "Java"]
+    },
+    
+    realWorldExamples: [
+      {
+        company: "Travel Booking Sites",
+        useCase: "Country selection and travel information",
+        description: "Flight booking and hotel sites using country data for forms"
+      },
+      {
+        company: "Educational Platforms",
+        useCase: "Geography learning applications",
+        description: "Schools using country data for interactive geography lessons"
+      }
+    ],
+    
+    codeExamples: {
+      javascript: `fetch('https://restcountries.com/v3.1/name/brazil')
+  .then(response => response.json())
+  .then(data => console.log(data[0]));`,
+      python: `import requests
+response = requests.get('https://restcountries.com/v3.1/name/brazil')
+country_data = response.json()[0]`
+    },
+    
+    comparisonMetrics: {
+      responseTime: 250,
+      uptime: 99.5,
+      easeOfUse: 8.5,
+      documentation: 8.8,
+      communitySupport: 9.2
+    }
+  },
+
+  "openweathermap": {
+    id: "openweathermap",
+    name: "OpenWeatherMap",
+    category: "data-information",
+    subcategory: "weather",
+    description: "Comprehensive weather data and forecasting services with global coverage",
+    useCase: "Weather apps, travel planning, agricultural applications, smart home systems",
+    tags: ["weather", "forecast", "climate", "api-key", "freemium"],
+    
+    metadata: {
+      popularity: 92,
+      rating: 4.5,
+      usageLevel: "intermediate",
+      pricingModel: "freemium",
+      status: "active",
+      lastUpdated: "2024-01-15",
+      monthlyUsers: "3M+"
+    },
+    
+    technical: {
+      baseUrl: "https://api.openweathermap.org/data/2.5",
+      authentication: "api-key",
+      rateLimit: "60 calls/minute (free)",
+      responseFormat: ["json", "xml"],
+      cors: true,
+      https: true,
+      endpoints: [
+        { path: "/weather", method: "GET", description: "Current weather data" },
+        { path: "/forecast", method: "GET", description: "5 day forecast" },
+        { path: "/onecall", method: "GET", description: "Complete weather data" }
+      ]
+    },
+    
+    documentation: {
+      official: "https://openweathermap.org/api",
+      tutorials: ["Weather App Tutorial", "React Weather Dashboard"],
+      sdks: ["JavaScript", "Python", "Java", "Swift", "Kotlin"]
+    },
+    
+    realWorldExamples: [
+      {
+        company: "Delivery Apps",
+        useCase: "Weather-based delivery scheduling",
+        description: "Food delivery apps adjusting delivery times based on weather"
+      },
+      {
+        company: "Smart Home Systems",
+        useCase: "Automated climate control",
+        description: "IoT devices adjusting settings based on weather forecasts"
+      }
+    ],
+    
+    codeExamples: {
+      javascript: `fetch('https://api.openweathermap.org/data/2.5/weather?q=London&appid=YOUR_API_KEY')
+  .then(response => response.json())
+  .then(data => console.log(data));`,
+      python: `import requests
+response = requests.get('https://api.openweathermap.org/data/2.5/weather', 
+                       params={'q': 'London', 'appid': 'YOUR_API_KEY'})
+weather_data = response.json()`
+    },
+    
+    comparisonMetrics: {
+      responseTime: 300,
+      uptime: 99.8,
+      easeOfUse: 7.5,
+      documentation: 9.5,
+      communitySupport: 9.5
+    }
+  },
+
+  "coingecko": {
+    id: "coingecko",
+    name: "CoinGecko API",
+    category: "data-information",
+    subcategory: "cryptocurrency",
+    description: "Comprehensive cryptocurrency market data, prices, and analytics platform",
+    useCase: "Trading platforms, portfolio trackers, market analysis, crypto dashboards",
+    tags: ["cryptocurrency", "trading", "market-data", "prices", "free"],
+    
+    metadata: {
+      popularity: 85,
+      rating: 4.4,
+      usageLevel: "intermediate",
+      pricingModel: "freemium",
+      status: "active",
+      lastUpdated: "2024-01-14",
+      monthlyUsers: "1.2M+"
+    },
+    
+    technical: {
+      baseUrl: "https://api.coingecko.com/api/v3",
+      authentication: "none (optional api-key)",
+      rateLimit: "10-50 calls/minute",
+      responseFormat: ["json"],
+      cors: true,
+      https: true,
+      endpoints: [
+        { path: "/coins/markets", method: "GET", description: "Cryptocurrency market data" },
+        { path: "/simple/price", method: "GET", description: "Simple price data" },
+        { path: "/coins/{id}", method: "GET", description: "Detailed coin information" }
+      ]
+    },
+    
+    documentation: {
+      official: "https://www.coingecko.com/en/api/documentation",
+      tutorials: ["Crypto Portfolio App", "Market Data Dashboard"],
+      sdks: ["JavaScript", "Python", "Ruby", "Go"]
+    },
+    
+    realWorldExamples: [
+      {
+        company: "Portfolio Management Apps",
+        useCase: "Real-time crypto portfolio tracking",
+        description: "Apps like CoinTracker using CoinGecko for price data"
+      },
+      {
+        company: "Financial Dashboards",
+        useCase: "Market analysis and reporting",
+        description: "Investment firms using data for crypto market analysis"
+      }
+    ],
+    
+    codeExamples: {
+      javascript: `fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd')
+  .then(response => response.json())
+  .then(data => console.log(data.bitcoin.usd));`,
+      python: `import requests
+response = requests.get('https://api.coingecko.com/api/v3/simple/price', 
+                       params={'ids': 'bitcoin', 'vs_currencies': 'usd'})
+price = response.json()['bitcoin']['usd']`
+    },
+    
+    comparisonMetrics: {
+      responseTime: 400,
+      uptime: 99.3,
+      easeOfUse: 8.0,
+      documentation: 8.8,
+      communitySupport: 8.8
+    }
+  },
+
+  // Utility & Service APIs
+  "github": {
+    id: "github",
+    name: "GitHub API",
+    category: "utility-service",
+    subcategory: "developer-tools",
+    description: "Access to GitHub repositories, users, organizations and development data",
+    useCase: "Developer tools, portfolio websites, project management, code analysis",
+    tags: ["developer", "repositories", "version-control", "oauth", "freemium"],
+    
+    metadata: {
+      popularity: 96,
+      rating: 4.6,
+      usageLevel: "advanced",
+      pricingModel: "freemium",
+      status: "active",
+      lastUpdated: "2024-01-15",
+      monthlyUsers: "5M+"
+    },
+    
+    technical: {
+      baseUrl: "https://api.github.com",
+      authentication: "oauth/token",
+      rateLimit: "5000 requests/hour (authenticated)",
+      responseFormat: ["json"],
+      cors: true,
+      https: true,
+      endpoints: [
+        { path: "/user", method: "GET", description: "Get authenticated user" },
+        { path: "/users/{username}", method: "GET", description: "Get user profile" },
+        { path: "/repos/{owner}/{repo}", method: "GET", description: "Get repository" },
+        { path: "/search/repositories", method: "GET", description: "Search repositories" }
+      ]
+    },
+    
+    documentation: {
+      official: "https://docs.github.com/en/rest",
+      tutorials: ["GitHub Portfolio Site", "Repository Analytics"],
+      sdks: ["JavaScript", "Python", "Ruby", "Go", "Java", "C#"]
+    },
+    
+    realWorldExamples: [
+      {
+        company: "Developer Portfolio Sites",
+        useCase: "Displaying GitHub activity and projects",
+        description: "Developers showcasing their repositories and contributions"
+      },
+      {
+        company: "Code Analysis Tools",
+        useCase: "Repository analysis and metrics",
+        description: "Tools like GitKraken analyzing repository statistics"
+      }
+    ],
+    
+    codeExamples: {
+      javascript: `fetch('https://api.github.com/users/octocat', {
+  headers: { 'Authorization': 'token YOUR_TOKEN' }
+})
+.then(response => response.json())
+.then(data => console.log(data));`,
+      python: `import requests
+headers = {'Authorization': 'token YOUR_TOKEN'}
+response = requests.get('https://api.github.com/users/octocat', headers=headers)
+user_data = response.json()`
+    },
+    
+    comparisonMetrics: {
+      responseTime: 200,
+      uptime: 99.9,
+      easeOfUse: 7.0,
+      documentation: 9.8,
+      communitySupport: 9.9
+    }
+  },
+
+  "jokeapi": {
+    id: "jokeapi",
+    name: "JokeAPI",
+    category: "utility-service",
+    subcategory: "entertainment",
+    description: "Programming and general jokes database with content filtering options",
+    useCase: "Entertainment apps, chatbots, developer tools, stress relief applications",
+    tags: ["jokes", "humor", "programming", "entertainment", "free"],
+    
+    metadata: {
+      popularity: 72,
+      rating: 4.2,
+      usageLevel: "beginner",
+      pricingModel: "free",
+      status: "active",
+      lastUpdated: "2024-01-11",
+      monthlyUsers: "400K+"
+    },
+    
+    technical: {
+      baseUrl: "https://v2.jokeapi.dev",
+      authentication: "none",
+      rateLimit: "120 requests/minute",
+      responseFormat: ["json", "xml", "yaml"],
+      cors: true,
+      https: true,
+      endpoints: [
+        { path: "/joke/Any", method: "GET", description: "Get random joke" },
+        { path: "/joke/Programming", method: "GET", description: "Programming jokes only" },
+        { path: "/joke/Any?safe-mode", method: "GET", description: "Safe jokes only" }
+      ]
+    },
+    
+    documentation: {
+      official: "https://v2.jokeapi.dev/",
+      tutorials: ["Joke Bot Tutorial", "Entertainment App Examples"],
+      sdks: ["JavaScript", "Python", "PHP"]
+    },
+    
+    realWorldExamples: [
+      {
+        company: "Developer Community Platforms",
+        useCase: "Daily jokes and community engagement",
+        description: "Developer Slack channels using joke bots for team morale"
+      },
+      {
+        company: "Coding Bootcamps",
+        useCase: "Breaking ice in programming lessons",
+        description: "Instructors using programming jokes to lighten coding lessons"
+      }
+    ],
+    
+    codeExamples: {
+      javascript: `fetch('https://v2.jokeapi.dev/joke/Programming?safe-mode')
+  .then(response => response.json())
+  .then(data => console.log(data.joke || \`\${data.setup} \${data.delivery}\`));`,
+      python: `import requests
+response = requests.get('https://v2.jokeapi.dev/joke/Programming?safe-mode')
+joke_data = response.json()`
+    },
+    
+    comparisonMetrics: {
+      responseTime: 180,
+      uptime: 98.8,
+      easeOfUse: 9.2,
+      documentation: 8.5,
+      communitySupport: 8.0
+    }
+  },
+
+  "boredapi": {
+    id: "boredapi",
+    name: "Bored API",
+    category: "utility-service",
+    subcategory: "lifestyle",
+    description: "Activity suggestions to combat boredom with filtering and categorization",
+    useCase: "Lifestyle apps, activity planners, wellness applications, recommendation engines",
+    tags: ["activities", "lifestyle", "recommendations", "wellness", "free"],
+    
+    metadata: {
+      popularity: 68,
+      rating: 4.1,
+      usageLevel: "beginner",
+      pricingModel: "free",
+      status: "active",
+      lastUpdated: "2024-01-09",
+      monthlyUsers: "300K+"
+    },
+    
+    technical: {
+      baseUrl: "https://www.boredapi.com/api",
+      authentication: "none",
+      rateLimit: "unlimited",
+      responseFormat: ["json"],
+      cors: true,
+      https: true,
+      endpoints: [
+        { path: "/activity", method: "GET", description: "Get random activity" },
+        { path: "/activity?type={type}", method: "GET", description: "Activity by type" },
+        { path: "/activity?participants={number}", method: "GET", description: "Activity by participants" }
+      ]
+    },
+    
+    documentation: {
+      official: "https://www.boredapi.com/documentation",
+      tutorials: ["Activity App Tutorial", "Wellness Platform Examples"],
+      sdks: ["JavaScript", "Python"]
+    },
+    
+    realWorldExamples: [
+      {
+        company: "Mental Health Apps",
+        useCase: "Activity suggestions for mood improvement",
+        description: "Wellness apps suggesting activities for users feeling down"
+      },
+      {
+        company: "Family Planning Apps",
+        useCase: "Weekend and vacation activity ideas",
+        description: "Family apps helping parents find activities for children"
+      }
+    ],
+    
+    codeExamples: {
+      javascript: `fetch('https://www.boredapi.com/api/activity')
+  .then(response => response.json())
+  .then(data => console.log(data.activity));`,
+      python: `import requests
+response = requests.get('https://www.boredapi.com/api/activity')
+activity = response.json()['activity']`
+    },
+    
+    comparisonMetrics: {
+      responseTime: 220,
+      uptime: 98.2,
+      easeOfUse: 8.8,
+      documentation: 7.8,
+      communitySupport: 7.5
+    }
+  }
+};
