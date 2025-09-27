@@ -1,0 +1,237 @@
+
+import React, { useState, useEffect, useCallback } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { InvokeLLM } from "@/integrations/Core";
+import { Cloud, MapPin, Thermometer, Wind, Droplets, Heart, Search } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+export default function WeatherCard({ isDark, refreshing, isFavorite, onToggleFavorite }) {
+  const [weatherData, setWeatherData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [city, setCity] = useState("New York");
+  const [searchCity, setSearchCity] = useState("");
+
+  const fetchWeather = useCallback(async (cityName = city) => {
+    setLoading(true);
+    try {
+      const result = await InvokeLLM({
+        prompt: `Get current weather information for ${cityName}. I need temperature, weather condition, humidity, wind speed, and a brief description. Format as JSON.`,
+        add_context_from_internet: true,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            city: { type: "string" },
+            country: { type: "string" },
+            temperature: { type: "number" },
+            condition: { type: "string" },
+            description: { type: "string" },
+            humidity: { type: "number" },
+            windSpeed: { type: "number" },
+            icon: { type: "string" }
+          }
+        }
+      });
+      setWeatherData(result);
+      setCity(cityName);
+    } catch (error) {
+      console.error("Weather fetch error:", error);
+    }
+    setLoading(false);
+  }, [city]); // city is a dependency because it's used as a default parameter
+
+  const handleSearch = () => {
+    if (searchCity.trim()) {
+      fetchWeather(searchCity.trim());
+      setSearchCity("");
+    }
+  };
+
+  useEffect(() => {
+    fetchWeather();
+  }, [fetchWeather]); // fetchWeather is now a stable function thanks to useCallback
+
+  useEffect(() => {
+    if (refreshing) {
+      fetchWeather();
+    }
+  }, [refreshing, fetchWeather]); // fetchWeather is now a stable function thanks to useCallback
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3 }}
+      className="relative group"
+    >
+      <Card className={`${
+        isDark 
+          ? 'bg-gradient-to-br from-blue-900/20 via-cyan-800/10 to-blue-900/20 border-blue-500/20 backdrop-blur-xl' 
+          : 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200/50 backdrop-blur-xl'
+      } transition-all duration-300 hover:scale-105 overflow-hidden`}>
+        {/* Animated Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        
+        <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500">
+              <Cloud className="w-4 h-4 text-white" />
+            </div>
+            <CardTitle className={`text-lg font-semibold ${
+              isDark ? 'text-white' : 'text-gray-800'
+            }`}>
+              Weather
+            </CardTitle>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggleFavorite}
+            className={`${
+              isFavorite 
+                ? 'text-red-500 hover:text-red-600' 
+                : isDark ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-600'
+            }`}
+          >
+            <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+          </Button>
+        </CardHeader>
+
+        <CardContent className="space-y-4 relative">
+          {/* Search */}
+          <div className="flex gap-2">
+            <Input
+              placeholder="Enter city name"
+              value={searchCity}
+              onChange={(e) => setSearchCity(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              className={`${
+                isDark 
+                  ? 'bg-white/5 border-white/10 text-white placeholder:text-gray-400' 
+                  : 'bg-white/80 border-gray-200 text-gray-800'
+              }`}
+            />
+            <Button 
+              onClick={handleSearch} 
+              size="icon"
+              className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
+            >
+              <Search className="w-4 h-4" />
+            </Button>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {loading ? (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-3"
+              >
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-8 w-1/2" />
+                <div className="grid grid-cols-2 gap-2">
+                  <Skeleton className="h-12" />
+                  <Skeleton className="h-12" />
+                </div>
+              </motion.div>
+            ) : weatherData ? (
+              <motion.div
+                key="data"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-4"
+              >
+                {/* Location */}
+                <div className="flex items-center gap-2">
+                  <MapPin className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+                  <span className={`font-medium ${
+                    isDark ? 'text-white' : 'text-gray-800'
+                  }`}>
+                    {weatherData.city}, {weatherData.country}
+                  </span>
+                </div>
+
+                {/* Temperature & Condition */}
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <div className={`text-3xl font-bold ${
+                      isDark ? 'text-white' : 'text-gray-800'
+                    }`}>
+                      {Math.round(weatherData.temperature)}°C
+                    </div>
+                    <div className={`text-sm ${
+                      isDark ? 'text-gray-300' : 'text-gray-600'
+                    }`}>
+                      {weatherData.condition}
+                    </div>
+                  </div>
+                  <Badge 
+                    className={`${
+                      isDark 
+                        ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' 
+                        : 'bg-blue-100 text-blue-700 border-blue-200'
+                    }`}
+                  >
+                    {weatherData.description}
+                  </Badge>
+                </div>
+
+                {/* Weather Details */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className={`p-3 rounded-lg ${
+                    isDark ? 'bg-white/5' : 'bg-white/50'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      <Droplets className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+                      <span className={`text-sm ${
+                        isDark ? 'text-gray-300' : 'text-gray-600'
+                      }`}>Humidity</span>
+                    </div>
+                    <div className={`font-semibold ${
+                      isDark ? 'text-white' : 'text-gray-800'
+                    }`}>
+                      {weatherData.humidity}%
+                    </div>
+                  </div>
+                  <div className={`p-3 rounded-lg ${
+                    isDark ? 'bg-white/5' : 'bg-white/50'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      <Wind className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+                      <span className={`text-sm ${
+                        isDark ? 'text-gray-300' : 'text-gray-600'
+                      }`}>Wind</span>
+                    </div>
+                    <div className={`font-semibold ${
+                      isDark ? 'text-white' : 'text-gray-800'
+                    }`}>
+                      {weatherData.windSpeed} km/h
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="error"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className={`text-center py-4 ${
+                  isDark ? 'text-gray-400' : 'text-gray-500'
+                }`}
+              >
+                Failed to load weather data
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
