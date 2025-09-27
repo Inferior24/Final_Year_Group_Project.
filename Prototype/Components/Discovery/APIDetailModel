@@ -1,0 +1,402 @@
+import React, { useState } from "react";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogClose 
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  X, 
+  Heart, 
+  Star, 
+  ExternalLink, 
+  Copy, 
+  Globe, 
+  Shield, 
+  Zap,
+  Code,
+  BookOpen,
+  Users,
+  TrendingUp,
+  Clock
+} from "lucide-react";
+import { motion } from "framer-motion";
+
+export default function APIDetailModal({ 
+  api, 
+  isDark, 
+  isFavorite, 
+  onToggleFavorite, 
+  onClose, 
+  onCompare 
+}) {
+  const [copiedCode, setCopiedCode] = useState(null);
+
+  if (!api) return null;
+
+  const copyCode = (code, lang) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCode(lang);
+    setTimeout(() => setCopiedCode(null), 2000);
+  };
+
+  const getCategoryColor = (category) => {
+    switch (category) {
+      case 'content-media': return 'from-blue-500 to-cyan-500';
+      case 'data-information': return 'from-green-500 to-emerald-500';
+      case 'utility-service': return 'from-purple-500 to-pink-500';
+      default: return 'from-gray-500 to-gray-700';
+    }
+  };
+
+  const getPricingColor = (pricing) => {
+    switch (pricing) {
+      case 'free': return isDark ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-green-100 text-green-700 border-green-200';
+      case 'freemium': return isDark ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' : 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      case 'paid': return isDark ? 'bg-red-500/20 text-red-300 border-red-500/30' : 'bg-red-100 text-red-700 border-red-200';
+      default: return isDark ? 'bg-gray-500/20 text-gray-300 border-gray-500/30' : 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
+  return (
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className={`max-w-4xl max-h-[90vh] overflow-y-auto ${
+        isDark 
+          ? 'bg-gray-900/95 border-gray-700 backdrop-blur-xl' 
+          : 'bg-white/95 border-gray-200 backdrop-blur-xl'
+      }`}>
+        {/* Header */}
+        <DialogHeader className="relative pb-6 border-b border-gray-200/10">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-4">
+              <div className={`p-4 rounded-2xl bg-gradient-to-br ${getCategoryColor(api.category)}`}>
+                <Globe className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <DialogTitle className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                  {api.name}
+                </DialogTitle>
+                <p className={`text-lg mt-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                  {api.description}
+                </p>
+                <div className="flex items-center gap-3 mt-3">
+                  <Badge className={getPricingColor(api.metadata.pricingModel)}>
+                    {api.metadata.pricingModel}
+                  </Badge>
+                  <div className="flex items-center gap-1">
+                    <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                    <span className={`font-semibold ${isDark ? 'text-yellow-300' : 'text-yellow-600'}`}>
+                      {api.metadata.rating}
+                    </span>
+                  </div>
+                  <Badge variant="outline" className={`${
+                    isDark ? 'border-gray-600 text-gray-300' : 'border-gray-300 text-gray-600'
+                  }`}>
+                    {api.metadata.monthlyUsers} users
+                  </Badge>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onToggleFavorite}
+                className={`${
+                  isFavorite 
+                    ? 'text-red-500 hover:text-red-600' 
+                    : isDark ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-600'
+                }`}
+              >
+                <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
+              </Button>
+              <DialogClose asChild>
+                <Button variant="ghost" size="icon">
+                  <X className="w-5 h-5" />
+                </Button>
+              </DialogClose>
+            </div>
+          </div>
+        </DialogHeader>
+
+        {/* Content Tabs */}
+        <Tabs defaultValue="overview" className="mt-6">
+          <TabsList className={`grid w-full grid-cols-4 ${
+            isDark ? 'bg-gray-800/50' : 'bg-gray-100'
+          }`}>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="documentation">Docs</TabsTrigger>
+            <TabsTrigger value="examples">Examples</TabsTrigger>
+            <TabsTrigger value="metrics">Metrics</TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-6 mt-6">
+            {/* Key Information */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className={`${
+                isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'
+              }`}>
+                <CardContent className="p-4 text-center">
+                  <Shield className={`w-6 h-6 mx-auto mb-2 ${
+                    isDark ? 'text-blue-400' : 'text-blue-600'
+                  }`} />
+                  <div className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                    {api.technical.authentication === 'none' ? 'No Auth' : 'Auth Required'}
+                  </div>
+                  <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Authentication
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className={`${
+                isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'
+              }`}>
+                <CardContent className="p-4 text-center">
+                  <Zap className={`w-6 h-6 mx-auto mb-2 ${
+                    isDark ? 'text-green-400' : 'text-green-600'
+                  }`} />
+                  <div className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                    {api.technical.rateLimit}
+                  </div>
+                  <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Rate Limit
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className={`${
+                isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'
+              }`}>
+                <CardContent className="p-4 text-center">
+                  <Clock className={`w-6 h-6 mx-auto mb-2 ${
+                    isDark ? 'text-purple-400' : 'text-purple-600'
+                  }`} />
+                  <div className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                    {api.comparisonMetrics.responseTime}ms
+                  </div>
+                  <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Avg Response
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Use Case & Tags */}
+            <div className="space-y-4">
+              <div>
+                <h4 className={`font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                  Use Cases
+                </h4>
+                <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                  {api.useCase}
+                </p>
+              </div>
+
+              <div>
+                <h4 className={`font-semibold mb-3 ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                  Tags
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {api.tags?.map((tag, index) => (
+                    <Badge 
+                      key={index}
+                      variant="outline" 
+                      className={`${
+                        isDark 
+                          ? 'border-gray-600 text-gray-300 bg-gray-800/20' 
+                          : 'border-gray-300 text-gray-600 bg-gray-50'
+                      }`}
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Real World Examples */}
+            <div>
+              <h4 className={`font-semibold mb-3 ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                Real-World Usage
+              </h4>
+              <div className="space-y-3">
+                {api.realWorldExamples.map((example, index) => (
+                  <Card key={index} className={`${
+                    isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'
+                  }`}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        <Users className={`w-5 h-5 mt-1 ${
+                          isDark ? 'text-cyan-400' : 'text-cyan-600'
+                        }`} />
+                        <div>
+                          <div className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                            {example.company}
+                          </div>
+                          <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} mt-1`}>
+                            <strong>Use case:</strong> {example.useCase}
+                          </div>
+                          <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'} mt-1`}>
+                            {example.description}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Documentation Tab */}
+          <TabsContent value="documentation" className="space-y-6 mt-6">
+            {/* Endpoints */}
+            <div>
+              <h4 className={`font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                API Endpoints
+              </h4>
+              <div className="space-y-2">
+                {api.technical.endpoints.map((endpoint, index) => (
+                  <Card key={index} className={`${
+                    isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'
+                  }`}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Badge className={`${
+                            endpoint.method === 'GET' 
+                              ? 'bg-green-500/20 text-green-300 border-green-500/30'
+                              : 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                          }`}>
+                            {endpoint.method}
+                          </Badge>
+                          <code className={`font-mono text-sm ${
+                            isDark ? 'text-cyan-300' : 'text-cyan-600'
+                          }`}>
+                            {api.technical.baseUrl}{endpoint.path}
+                          </code>
+                        </div>
+                      </div>
+                      <div className={`text-sm mt-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                        {endpoint.description}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* Documentation Links */}
+            <div>
+              <h4 className={`font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                Documentation & Resources
+              </h4>
+              <div className="space-y-3">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => window.open(api.documentation.official, '_blank')}
+                >
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Official Documentation
+                  <ExternalLink className="w-4 h-4 ml-auto" />
+                </Button>
+                
+                {api.documentation.tutorials?.map((tutorial, index) => (
+                  <Button
+                    key={index}
+                    variant="outline"
+                    className="w-full justify-start"
+                  >
+                    <Code className="w-4 h-4 mr-2" />
+                    {tutorial}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Examples Tab */}
+          <TabsContent value="examples" className="space-y-6 mt-6">
+            <div>
+              <h4 className={`font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                Code Examples
+              </h4>
+              
+              {Object.entries(api.codeExamples).map(([lang, code]) => (
+                <Card key={lang} className={`${
+                  isDark ? 'bg-gray-800/50 border-gray-700' : 'bg-gray-50 border-gray-200'
+                }`}>
+                  <CardContent className="p-0">
+                    <div className={`flex items-center justify-between px-4 py-2 border-b ${
+                      isDark ? 'border-gray-700' : 'border-gray-200'
+                    }`}>
+                      <Badge variant="outline" className={`${
+                        isDark ? 'border-gray-600 text-gray-300' : 'border-gray-300 text-gray-600'
+                      }`}>
+                        {lang}
+                      </Badge>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyCode(code, lang)}
+                        className={`${
+                          copiedCode === lang 
+                            ? 'text-green-500' 
+                            : isDark ? 'text-gray-400' : 'text-gray-600'
+                        }`}
+                      >
+                        <Copy className="w-4 h-4 mr-1" />
+                        {copiedCode === lang ? 'Copied!' : 'Copy'}
+                      </Button>
+                    </div>
+                    <pre className={`p-4 overflow-x-auto text-sm ${
+                      isDark ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      <code>{code}</code>
+                    </pre>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Metrics Tab */}
+          <TabsContent value="metrics" className="space-y-6 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {Object.entries(api.comparisonMetrics).map(([metric, value]) => (
+                <Card key={metric} className={`${
+                  isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'
+                }`}>
+                  <CardContent className="p-4 text-center">
+                    <TrendingUp className={`w-6 h-6 mx-auto mb-2 ${
+                      isDark ? 'text-green-400' : 'text-green-600'
+                    }`} />
+                    <div className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                      {typeof value === 'number' ? (
+                        metric === 'responseTime' ? `${value}ms` : 
+                        metric === 'uptime' ? `${value}%` : 
+                        `${value}/10`
+                      ) : value}
+                    </div>
+                    <div className={`text-sm capitalize ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                      {metric.replace(/([A-Z])/g, ' $1').toLowerCase()}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </DialogContent>
+    </Dialog>
+  );
+}
