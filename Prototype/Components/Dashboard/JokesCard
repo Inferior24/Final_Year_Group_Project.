@@ -1,0 +1,179 @@
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { InvokeLLM } from "@/integrations/Core";
+import { Smile, RefreshCw, Heart, Laugh } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+export default function JokesCard({ isDark, refreshing, isFavorite, onToggleFavorite }) {
+  const [jokeData, setJokeData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const fetchJoke = async () => {
+    setLoading(true);
+    try {
+      const result = await InvokeLLM({
+        prompt: `Give me a clean, family-friendly programming or technology joke. It should be funny and appropriate for all audiences. Include the setup, punchline, and category. Format as JSON.`,
+        add_context_from_internet: true,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            setup: { type: "string" },
+            punchline: { type: "string" },
+            category: { type: "string" },
+            type: { type: "string" }
+          }
+        }
+      });
+      setJokeData(result);
+    } catch (error) {
+      console.error("Joke fetch error:", error);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchJoke();
+  }, []);
+
+  useEffect(() => {
+    if (refreshing) {
+      fetchJoke();
+    }
+  }, [refreshing]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3, delay: 0.4 }}
+      className="relative group"
+    >
+      <Card className={`${
+        isDark 
+          ? 'bg-gradient-to-br from-purple-900/20 via-pink-800/10 to-purple-900/20 border-purple-500/20 backdrop-blur-xl' 
+          : 'bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200/50 backdrop-blur-xl'
+      } transition-all duration-300 hover:scale-105 overflow-hidden`}>
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        
+        <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
+              <Smile className="w-4 h-4 text-white" />
+            </div>
+            <CardTitle className={`text-lg font-semibold ${
+              isDark ? 'text-white' : 'text-gray-800'
+            }`}>
+              Jokes
+            </CardTitle>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggleFavorite}
+              className={`${
+                isFavorite 
+                  ? 'text-red-500 hover:text-red-600' 
+                  : isDark ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-600'
+              }`}
+            >
+              <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={fetchJoke}
+              disabled={loading}
+              className={`${isDark ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-600'}`}
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
+        </CardHeader>
+
+        <CardContent className="relative">
+          <AnimatePresence mode="wait">
+            {loading ? (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-3"
+              >
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-6 w-20 mt-3" />
+              </motion.div>
+            ) : jokeData ? (
+              <motion.div
+                key="data"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-4"
+              >
+                <div className={`p-4 rounded-lg ${isDark ? 'bg-white/5' : 'bg-white/50'}`}>
+                  <div className="flex items-start gap-3">
+                    <Laugh className={`w-5 h-5 mt-1 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
+                    <div className="space-y-3">
+                      {jokeData.setup && (
+                        <div className={`${isDark ? 'text-white' : 'text-gray-800'}`}>
+                          {jokeData.setup}
+                        </div>
+                      )}
+                      {jokeData.punchline && (
+                        <div className={`font-semibold ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>
+                          {jokeData.punchline}
+                        </div>
+                      )}
+                      {/* Handle single joke format */}
+                      {!jokeData.setup && !jokeData.punchline && jokeData.joke && (
+                        <div className={`${isDark ? 'text-white' : 'text-gray-800'}`}>
+                          {jokeData.joke}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <Badge 
+                    className={`${
+                      isDark 
+                        ? 'bg-purple-500/20 text-purple-300 border-purple-500/30' 
+                        : 'bg-purple-100 text-purple-700 border-purple-200'
+                    }`}
+                  >
+                    {jokeData.category || 'Programming'}
+                  </Badge>
+                  <Button
+                    onClick={fetchJoke}
+                    size="sm"
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                  >
+                    New Joke
+                  </Button>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="error"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className={`text-center py-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}
+              >
+                Failed to load joke
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
