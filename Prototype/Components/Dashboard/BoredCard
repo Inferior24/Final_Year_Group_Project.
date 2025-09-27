@@ -1,0 +1,228 @@
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { InvokeLLM } from "@/integrations/Core";
+import { Activity, RefreshCw, Heart, Zap, Users, DollarSign } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+export default function BoredCard({ isDark, refreshing, isFavorite, onToggleFavorite }) {
+  const [activityData, setActivityData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const fetchActivity = async () => {
+    setLoading(true);
+    try {
+      const result = await InvokeLLM({
+        prompt: `Suggest a random fun activity that someone can do when they're bored. Include the activity name, type/category, number of participants needed, approximate price range (free, low, medium, high), and accessibility level (easy, moderate, hard). Format as JSON.`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            activity: { type: "string" },
+            type: { type: "string" },
+            participants: { type: "number" },
+            price: { type: "string" },
+            accessibility: { type: "string" },
+            description: { type: "string" }
+          }
+        }
+      });
+      setActivityData(result);
+    } catch (error) {
+      console.error("Activity fetch error:", error);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchActivity();
+  }, []);
+
+  useEffect(() => {
+    if (refreshing) {
+      fetchActivity();
+    }
+  }, [refreshing]);
+
+  const getPriceColor = (price) => {
+    switch (price?.toLowerCase()) {
+      case 'free': return 'text-green-500';
+      case 'low': return 'text-yellow-500';
+      case 'medium': return 'text-orange-500';
+      case 'high': return 'text-red-500';
+      default: return isDark ? 'text-gray-300' : 'text-gray-600';
+    }
+  };
+
+  const getAccessibilityColor = (accessibility) => {
+    switch (accessibility?.toLowerCase()) {
+      case 'easy': return 'text-green-500';
+      case 'moderate': return 'text-yellow-500';
+      case 'hard': return 'text-red-500';
+      default: return isDark ? 'text-gray-300' : 'text-gray-600';
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3, delay: 0.6 }}
+      className="relative group"
+    >
+      <Card className={`${
+        isDark 
+          ? 'bg-gradient-to-br from-indigo-900/20 via-purple-800/10 to-indigo-900/20 border-indigo-500/20 backdrop-blur-xl' 
+          : 'bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200/50 backdrop-blur-xl'
+      } transition-all duration-300 hover:scale-105 overflow-hidden`}>
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        
+        <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500">
+              <Activity className="w-4 h-4 text-white" />
+            </div>
+            <CardTitle className={`text-lg font-semibold ${
+              isDark ? 'text-white' : 'text-gray-800'
+            }`}>
+              Activities
+            </CardTitle>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggleFavorite}
+              className={`${
+                isFavorite 
+                  ? 'text-red-500 hover:text-red-600' 
+                  : isDark ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-600'
+              }`}
+            >
+              <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={fetchActivity}
+              disabled={loading}
+              className={`${isDark ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-600'}`}
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
+        </CardHeader>
+
+        <CardContent className="space-y-4 relative">
+          <AnimatePresence mode="wait">
+            {loading ? (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-3"
+              >
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <div className="flex gap-2">
+                  <Skeleton className="h-6 w-16" />
+                  <Skeleton className="h-6 w-20" />
+                  <Skeleton className="h-6 w-18" />
+                </div>
+              </motion.div>
+            ) : activityData ? (
+              <motion.div
+                key="data"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-4"
+              >
+                {/* Activity */}
+                <div className={`p-4 rounded-lg ${isDark ? 'bg-white/5' : 'bg-white/50'}`}>
+                  <div className="flex items-start gap-3">
+                    <Zap className={`w-5 h-5 mt-1 ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`} />
+                    <div className="space-y-2">
+                      <div className={`font-semibold text-lg ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                        {activityData.activity}
+                      </div>
+                      {activityData.description && (
+                        <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                          {activityData.description}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Activity Details */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className={`p-3 rounded-lg ${isDark ? 'bg-white/5' : 'bg-white/50'}`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Users className={`w-4 h-4 ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`} />
+                      <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                        Participants
+                      </span>
+                    </div>
+                    <div className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                      {activityData.participants || 1}
+                    </div>
+                  </div>
+
+                  <div className={`p-3 rounded-lg ${isDark ? 'bg-white/5' : 'bg-white/50'}`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <DollarSign className={`w-4 h-4 ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`} />
+                      <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                        Price
+                      </span>
+                    </div>
+                    <div className={`font-semibold ${getPriceColor(activityData.price)}`}>
+                      {activityData.price || 'Free'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2">
+                  <Badge className={`${
+                    isDark 
+                      ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' 
+                      : 'bg-indigo-100 text-indigo-700 border-indigo-200'
+                  }`}>
+                    {activityData.type || 'Activity'}
+                  </Badge>
+                  
+                  <Badge 
+                    variant="outline" 
+                    className={`${getAccessibilityColor(activityData.accessibility)} border-current`}
+                  >
+                    {activityData.accessibility || 'Easy'}
+                  </Badge>
+                </div>
+
+                <Button
+                  onClick={fetchActivity}
+                  className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600"
+                >
+                  Get New Activity
+                </Button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="error"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className={`text-center py-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}
+              >
+                Failed to load activity
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
