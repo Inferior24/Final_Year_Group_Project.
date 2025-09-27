@@ -1,0 +1,231 @@
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { InvokeLLM } from "@/integrations/Core";
+import { Globe, MapPin, Users, Heart, Search } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+export default function CountriesCard({ isDark, refreshing, isFavorite, onToggleFavorite }) {
+  const [countryData, setCountryData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [searchCountry, setSearchCountry] = useState("");
+
+  const fetchCountryData = async (country = "random") => {
+    setLoading(true);
+    try {
+      const prompt = country === "random" 
+        ? "Get information about 3 random countries including name, capital, population, region, flag emoji, and main language. Format as JSON."
+        : `Get detailed information about the country ${country} including name, capital, population, region, flag emoji, currencies, and languages. Format as JSON.`;
+        
+      const result = await InvokeLLM({
+        prompt,
+        add_context_from_internet: true,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            countries: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  capital: { type: "string" },
+                  population: { type: "number" },
+                  region: { type: "string" },
+                  flag: { type: "string" },
+                  languages: { type: "array", items: { type: "string" } },
+                  currencies: { type: "array", items: { type: "string" } }
+                }
+              }
+            }
+          }
+        }
+      });
+      setCountryData(result);
+    } catch (error) {
+      console.error("Country fetch error:", error);
+    }
+    setLoading(false);
+  };
+
+  const handleSearch = () => {
+    if (searchCountry.trim()) {
+      fetchCountryData(searchCountry.trim());
+      setSearchCountry("");
+    } else {
+      fetchCountryData("random");
+    }
+  };
+
+  useEffect(() => {
+    fetchCountryData();
+  }, []);
+
+  useEffect(() => {
+    if (refreshing) {
+      fetchCountryData("random");
+    }
+  }, [refreshing]);
+
+  const formatPopulation = (pop) => {
+    if (pop >= 1e9) return `${(pop / 1e9).toFixed(1)}B`;
+    if (pop >= 1e6) return `${(pop / 1e6).toFixed(1)}M`;
+    if (pop >= 1e3) return `${(pop / 1e3).toFixed(1)}K`;
+    return pop?.toLocaleString();
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3, delay: 0.3 }}
+      className="relative group"
+    >
+      <Card className={`${
+        isDark 
+          ? 'bg-gradient-to-br from-green-900/20 via-emerald-800/10 to-green-900/20 border-green-500/20 backdrop-blur-xl' 
+          : 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200/50 backdrop-blur-xl'
+      } transition-all duration-300 hover:scale-105 overflow-hidden`}>
+        <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        
+        <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500">
+              <Globe className="w-4 h-4 text-white" />
+            </div>
+            <CardTitle className={`text-lg font-semibold ${
+              isDark ? 'text-white' : 'text-gray-800'
+            }`}>
+              Countries
+            </CardTitle>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggleFavorite}
+            className={`${
+              isFavorite 
+                ? 'text-red-500 hover:text-red-600' 
+                : isDark ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-600'
+            }`}
+          >
+            <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+          </Button>
+        </CardHeader>
+
+        <CardContent className="space-y-4 relative">
+          {/* Search */}
+          <div className="flex gap-2">
+            <Input
+              placeholder="Enter country name or leave empty for random"
+              value={searchCountry}
+              onChange={(e) => setSearchCountry(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              className={`${
+                isDark 
+                  ? 'bg-white/5 border-white/10 text-white placeholder:text-gray-400' 
+                  : 'bg-white/80 border-gray-200 text-gray-800'
+              }`}
+            />
+            <Button 
+              onClick={handleSearch} 
+              size="icon"
+              className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+            >
+              <Search className="w-4 h-4" />
+            </Button>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {loading ? (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-3"
+              >
+                {Array(2).fill(0).map((_, i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="w-8 h-6 rounded" />
+                      <Skeleton className="h-5 w-32" />
+                    </div>
+                    <Skeleton className="h-12 w-full" />
+                  </div>
+                ))}
+              </motion.div>
+            ) : countryData?.countries ? (
+              <motion.div
+                key="data"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-3"
+              >
+                {countryData.countries.slice(0, 3).map((country, index) => (
+                  <motion.div
+                    key={country.name}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className={`p-3 rounded-lg ${isDark ? 'bg-white/5' : 'bg-white/50'} hover:scale-105 transition-transform duration-200`}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl">{country.flag}</span>
+                        <div>
+                          <div className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                            {country.name}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <MapPin className={`w-3 h-3 ${isDark ? 'text-green-400' : 'text-green-600'}`} />
+                            <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                              {country.capital}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <Badge className={`${
+                        isDark 
+                          ? 'bg-green-500/20 text-green-300 border-green-500/30' 
+                          : 'bg-green-100 text-green-700 border-green-200'
+                      }`}>
+                        {country.region}
+                      </Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div className="flex items-center gap-1">
+                        <Users className={`w-3 h-3 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
+                        <span className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                          {formatPopulation(country.population)}
+                        </span>
+                      </div>
+                      <div className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                        {country.languages?.[0] || 'N/A'}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="error"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className={`text-center py-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}
+              >
+                Failed to load country data
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
