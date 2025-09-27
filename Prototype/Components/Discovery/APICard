@@ -1,0 +1,188 @@
+
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Heart, Star, Zap, Globe, Code, ExternalLink } from "lucide-react";
+import { motion } from "framer-motion";
+
+export default function APICard({ 
+  api, 
+  index, 
+  isDark, 
+  isFavorite, 
+  onToggleFavorite, 
+  onSelect 
+}) {
+  const getCategoryIcon = (category) => {
+    switch (category) {
+      case 'content-media': return Code;
+      case 'data-information': return Globe;
+      case 'utility-service': return Zap;
+      default: return Code;
+    }
+  };
+
+  const getCategoryColor = (category) => {
+    switch (category) {
+      case 'content-media': return 'from-blue-500 to-cyan-500';
+      case 'data-information': return 'from-green-500 to-emerald-500';
+      case 'utility-service': return 'from-purple-500 to-pink-500';
+      default: return 'from-gray-500 to-gray-700';
+    }
+  };
+
+  const getPricingColor = (pricing) => {
+    switch (pricing) {
+      case 'free': return isDark ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-green-100 text-green-700 border-green-200';
+      case 'freemium': return isDark ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' : 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      case 'paid': return isDark ? 'bg-red-500/20 text-red-300 border-red-500/30' : 'bg-red-100 text-red-700 border-red-200';
+      default: return isDark ? 'bg-gray-500/20 text-gray-300 border-gray-500/30' : 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
+  const CategoryIcon = getCategoryIcon(api.category);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.1 }}
+      className="relative group"
+    >
+      <Card className={`${
+        isDark 
+          ? 'bg-gradient-to-br from-gray-800/20 via-gray-700/10 to-gray-800/20 border-gray-500/20 backdrop-blur-xl' 
+          : 'bg-gradient-to-br from-white/80 to-gray-50/80 border-gray-200/50 backdrop-blur-xl'
+      } transition-all duration-300 hover:scale-105 hover:shadow-2xl overflow-hidden cursor-pointer`}
+      onClick={onSelect}
+    >
+      {/* Gradient Overlay */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${getCategoryColor(api.category)} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
+      
+      <CardHeader className="flex flex-row items-start justify-between pb-3 relative">
+        <div className="flex items-start gap-3">
+          <div className={`p-3 rounded-xl bg-gradient-to-br ${getCategoryColor(api.category)}`}>
+            <CategoryIcon className="w-5 h-5 text-white" />
+          </div>
+          <div className="flex-1">
+            <CardTitle className={`text-lg font-bold ${
+              isDark ? 'text-white' : 'text-gray-800'
+            } group-hover:text-transparent group-hover:bg-gradient-to-r transition-all duration-300`}
+            style={{
+              backgroundImage: `linear-gradient(to right, ${getCategoryColor(api.category).includes('blue') ? '#3b82f6' : getCategoryColor(api.category).includes('green') ? '#10b981' : '#a855f7'}, ${getCategoryColor(api.category).includes('blue') ? '#06b6d4' : getCategoryColor(api.category).includes('green') ? '#34d399' : '#ec4899'})`,
+              backgroundClip: 'text'
+            }}
+            >
+              {api.name}
+            </CardTitle>
+            <div className="flex items-center gap-2 mt-1">
+              <Badge className={getPricingColor(api.metadata.pricingModel)}>
+                {api.metadata.pricingModel}
+              </Badge>
+              <div className="flex items-center gap-1">
+                <Star className="w-3 h-3 text-yellow-500 fill-current" />
+                <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                  {api.metadata.rating}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleFavorite();
+          }}
+          className={`${
+            isFavorite 
+              ? 'text-red-500 hover:text-red-600' 
+              : isDark ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-600'
+          } transition-colors duration-200`}
+        >
+          <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+        </Button>
+      </CardHeader>
+
+      <CardContent className="relative pt-0">
+        <div className="space-y-4">
+          {/* Description */}
+          <p className={`text-sm leading-relaxed ${
+            isDark ? 'text-gray-300' : 'text-gray-600'
+          }`}>
+            {api.description}
+          </p>
+
+          {/* Use Case */}
+          <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+            <strong>Use cases:</strong> {api.useCase}
+          </div>
+
+          {/* Tags */}
+          <div className="flex flex-wrap gap-1">
+            {api.tags?.slice(0, 3).map((tag, tagIndex) => (
+              <Badge 
+                key={tagIndex}
+                variant="outline" 
+                className={`text-xs ${
+                  isDark 
+                    ? 'border-gray-600 text-gray-300 bg-gray-800/20' 
+                    : 'border-gray-300 text-gray-600 bg-gray-50'
+                }`}
+              >
+                {tag}
+              </Badge>
+            ))}
+            {api.tags?.length > 3 && (
+              <Badge variant="outline" className={`text-xs ${
+                isDark ? 'border-gray-600 text-gray-400' : 'border-gray-300 text-gray-500'
+              }`}>
+                +{api.tags.length - 3}
+              </Badge>
+            )}
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            <div className={`text-center p-2 rounded-lg ${
+              isDark ? 'bg-white/5' : 'bg-gray-50'
+            }`}>
+              <div className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                {api.metadata.popularity}%
+              </div>
+              <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                Popularity
+              </div>
+            </div>
+            <div className={`text-center p-2 rounded-lg ${
+              isDark ? 'bg-white/5' : 'bg-gray-50'
+            }`}>
+              <div className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                {api.metadata.monthlyUsers}
+              </div>
+              <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                Users
+              </div>
+            </div>
+          </div>
+
+          {/* Action Button */}
+          <Button 
+            className={`w-full bg-gradient-to-r ${getCategoryColor(api.category)} hover:shadow-lg transform hover:scale-105 transition-all duration-200`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect();
+            }}
+          >
+            <ExternalLink className="w-4 h-4 mr-2" />
+            Explore API
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+    </motion.div>
+  );
+}
