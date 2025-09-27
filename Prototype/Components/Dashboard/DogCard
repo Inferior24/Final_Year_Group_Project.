@@ -1,0 +1,208 @@
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { InvokeLLM, GenerateImage } from "@/integrations/Core";
+import { Camera, RefreshCw, Heart, Dog } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+export default function DogCard({ isDark, refreshing, isFavorite, onToggleFavorite }) {
+  const [dogData, setDogData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const fetchDogImage = async () => {
+    setLoading(true);
+    try {
+      // Generate a random cute dog image
+      const result = await GenerateImage({
+        prompt: "A cute, friendly dog in a natural setting, high quality, photorealistic, adorable pet photography"
+      });
+      
+      // Get random breed information
+      const breedInfo = await InvokeLLM({
+        prompt: `Give me information about a random dog breed including name, temperament, size, and fun fact. Format as JSON.`,
+        response_json_schema: {
+          type: "object", 
+          properties: {
+            breed: { type: "string" },
+            temperament: { type: "string" },
+            size: { type: "string" },
+            funFact: { type: "string" },
+            lifespan: { type: "string" }
+          }
+        }
+      });
+
+      setDogData({
+        imageUrl: result.url,
+        ...breedInfo
+      });
+    } catch (error) {
+      console.error("Dog fetch error:", error);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchDogImage();
+  }, []);
+
+  useEffect(() => {
+    if (refreshing) {
+      fetchDogImage();
+    }
+  }, [refreshing]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3, delay: 0.5 }}
+      className="relative group"
+    >
+      <Card className={`${
+        isDark 
+          ? 'bg-gradient-to-br from-orange-900/20 via-red-800/10 to-orange-900/20 border-orange-500/20 backdrop-blur-xl' 
+          : 'bg-gradient-to-br from-orange-50 to-red-50 border-orange-200/50 backdrop-blur-xl'
+      } transition-all duration-300 hover:scale-105 overflow-hidden`}>
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        
+        <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500 to-red-500">
+              <Camera className="w-4 h-4 text-white" />
+            </div>
+            <CardTitle className={`text-lg font-semibold ${
+              isDark ? 'text-white' : 'text-gray-800'
+            }`}>
+              Dog Images
+            </CardTitle>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggleFavorite}
+              className={`${
+                isFavorite 
+                  ? 'text-red-500 hover:text-red-600' 
+                  : isDark ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-600'
+              }`}
+            >
+              <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={fetchDogImage}
+              disabled={loading}
+              className={`${isDark ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-600'}`}
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
+        </CardHeader>
+
+        <CardContent className="space-y-4 relative">
+          <AnimatePresence mode="wait">
+            {loading ? (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-3"
+              >
+                <Skeleton className="h-40 w-full rounded-lg" />
+                <Skeleton className="h-4 w-3/4" />
+                <div className="flex gap-2">
+                  <Skeleton className="h-6 w-16" />
+                  <Skeleton className="h-6 w-20" />
+                </div>
+              </motion.div>
+            ) : dogData ? (
+              <motion.div
+                key="data"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-4"
+              >
+                {/* Dog Image */}
+                <div className="relative rounded-lg overflow-hidden">
+                  <img
+                    src={dogData.imageUrl}
+                    alt="Random dog"
+                    className="w-full h-40 object-cover hover:scale-110 transition-transform duration-300"
+                    onError={(e) => {
+                      e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='14' fill='%236b7280' text-anchor='middle' dy='0.3em'%3E🐕%3C/text%3E%3C/svg%3E";
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                </div>
+
+                {/* Breed Info */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Dog className={`w-4 h-4 ${isDark ? 'text-orange-400' : 'text-orange-600'}`} />
+                      <span className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                        {dogData.breed || "Random Breed"}
+                      </span>
+                    </div>
+                    <div className="flex gap-1">
+                      <Badge className={`${
+                        isDark 
+                          ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' 
+                          : 'bg-orange-100 text-orange-700 border-orange-200'
+                      }`}>
+                        {dogData.size || "Medium"}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <strong>Temperament:</strong> {dogData.temperament || "Friendly, loyal"}
+                  </div>
+
+                  <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <strong>Lifespan:</strong> {dogData.lifespan || "10-15 years"}
+                  </div>
+
+                  {dogData.funFact && (
+                    <div className={`p-3 rounded-lg ${isDark ? 'bg-white/5' : 'bg-white/50'}`}>
+                      <div className={`text-xs font-medium mb-1 ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>
+                        Fun Fact:
+                      </div>
+                      <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                        {dogData.funFact}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <Button
+                  onClick={fetchDogImage}
+                  className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+                >
+                  Get Another Dog
+                </Button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="error"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className={`text-center py-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}
+              >
+                Failed to load dog image
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
